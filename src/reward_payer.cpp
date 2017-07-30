@@ -213,12 +213,15 @@ void reward_payer() {
             if ( sum_amount + late_sum_amount >= MINIMUM_PAYOUT ){
                 ok_to_pay = true;
                 sum_amount += late_sum_amount;
-            } else if(late_sum_amount > 0) {
-                // If there is delayed payouts pay just those
+            } else if(late_sum_amount >= MINIMUM_DEFERRED_PAYOUT) {
+                // If there is delayed payouts passing the minimum deferred pay out limit pay just those
                 ok_to_pay = true;
                 deferred_amount += sum_amount;
                 sum_amount = late_sum_amount;
-            }
+            } else {
+				// Defer all
+				sum_amount += late_sum_amount;
+			}
 
 
 			if ( !ok_to_pay ) {
@@ -230,7 +233,7 @@ void reward_payer() {
 			CryptoCoinTx tx;
 			tx.sender = OUR_ACCOUNT_RS;
 			tx.encoded_passphrase = OUR_ACCOUNT_PASSPHRASE;
-			tx.fee_inclusive = false;
+			tx.fee_inclusive = true;
 			tx.fee = PAYMENT_SEND_FEE;
 
 			std::string recipientRS = BurstCoin::accountID_to_RS_string( accountID );
